@@ -77,15 +77,22 @@ def process_chunk(chunk, min_distance_away, max_window, min_number_of_proximal_c
 
 def process_bedpe(file, min_distance_away, max_window, min_number_of_proximal_connections, cluster_distance):
     print(f"Opening file: {file}")
-    with open(file, "r") as inf:
-        bedpe = inf.readlines()
+    try:
+        with open(file, "r") as inf:
+            bedpe = inf.readlines()
+    except Exception as e:
+        print(f"Error opening file: {e}")
+        return []
 
     print(f"Number of loops read: {len(bedpe)}")
 
     filtered_bedpe = []
     for line in bedpe:
         split_line = line.strip().split("\t")
-        
+
+        if len(split_line) < 6:  # Ensure there are enough fields in the line
+            continue
+
         start1 = int(split_line[1])
         start2 = int(split_line[4])
         distance = abs(start2 - start1)
@@ -103,6 +110,9 @@ def process_bedpe(file, min_distance_away, max_window, min_number_of_proximal_co
 
     print(f"Number of loops after filtering: {len(filtered_bedpe)}")
 
+    if not filtered_bedpe:
+        return []
+
     chunk_size = 1000
     chunks = [filtered_bedpe[i:i + chunk_size] for i in range(0, len(filtered_bedpe), chunk_size)]
 
@@ -114,14 +124,7 @@ def process_bedpe(file, min_distance_away, max_window, min_number_of_proximal_co
             result = future.result()
             clustered_loops.extend(result)
 
-    output_file = f"{file}.min_dist.{min_distance_away}.max_window.{max_window}.min_number.{min_number_of_proximal_connections}.cluster_dist.{cluster_distance}_pyp_para.bedpe"
-    print(f"Writing output to: {output_file}")
-
-    with open(output_file, "w") as out:
-        for loop in clustered_loops:
-            out.write(loop + "\n")
-
-    print(f"Number of clustered loops written to output: {len(clustered_loops)}")
+    return clustered_loops
 
 # Streamlit File Uploader and Data Processing for the Main Script
 uploaded_file = st.file_uploader("Upload BEDPE File", type="bedpe")
@@ -247,18 +250,21 @@ if uploaded_file is not None:
     # Call the process_bedpe function to handle clustering
     clustered_loops = process_bedpe(combined_file_path, min_dist, max_window, min_number, cluster_dist)
 
-    # Output file path
-    output_file = f"{combined_file_path}.min_dist.{min_dist}.max_window.{max_window}.min_number.{min_number}.cluster_dist.{cluster_dist}_pyp_para.bedpe"
-    st.write(f"Writing clustered output to: {output_file}")
+    if not clustered_loops:
+        st.error("No clustered loops were generated.")
+    else:
+        # Output file path
+        output_file = f"{combined_file_path}.min_dist.{min_dist}.max_window.{max_window}.min_number.{min_number}.cluster_dist.{cluster_dist}_pyp_para.bedpe"
+        st.write(f"Writing clustered output to: {output_file}")
 
-    # Save the clustered loops to the output file
-    with open(output_file, "w") as out:
-        for loop in clustered_loops:
-            out.write(loop + "\n")
+        # Save the clustered loops to the output file
+        with open(output_file, "w") as out:
+            for loop in clustered_loops:
+                out.write(loop + "\n")
 
-    st.success(f"Clustering process completed. Output saved to: {output_file}")
+        st.success(f"Clustering process completed. Output saved to: {output_file}")
 
-    # Option to download the clustered file
-    if os.path.exists(output_file):
-        with open(output_file, "rb") as clustered_file:
-            st.download_button("Download Clustered Data", clustered_file, file_name=os.path.basename(output_file))
+        # Option to download the clustered file
+        if os.path.exists(output_file):
+            with open(output_file, "rb") as clustered_file:
+                st.download_button("Download Clustered Data", clustered_file, file_name=os.path.basename(output_file))
