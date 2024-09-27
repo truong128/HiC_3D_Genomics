@@ -1,5 +1,6 @@
 streamlit==1.33.0
-numpy==1.22.4
+numpy>=1.26.0
 pandas==2.2.3
 scipy==1.8.0
 statsmodels==0.14.0
+setuptools>=65.5.1
