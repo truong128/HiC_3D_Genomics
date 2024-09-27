@@ -1,6 +1,6 @@
 streamlit==1.33.0
 numpy>=1.26.0
 pandas==2.2.3
-scipy==1.8.0
+scipy>=1.11.1  # Compatible with Python 3.12
 statsmodels==0.14.0
 setuptools>=65.5.1
