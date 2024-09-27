@@ -130,7 +130,7 @@ if uploaded_file is not None:
 
     # Running the external script (as a subprocess)
     output_file = f"{combined_file_path}.min_dist.{min_dist}.max_window.{max_window}.min_number.{min_number}.cluster_dist.{cluster_dist}_pyp_para.bedpe"
-    command = f"python truong128/HiC_3D_Genomics/blob/main/5_Parallel_Clustering_loops_from_bedpe.py {combined_file_path} {min_dist} {max_window} {min_number} {cluster_dist}"
+    command = f"python 5_Parallel_Clustering_loops_from_bedpe.py {combined_file_path} {min_dist} {max_window} {min_number} {cluster_dist}"
     
     try:
         subprocess.run(command, shell=True, check=True)
