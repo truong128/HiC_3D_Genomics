@@ -6,7 +6,7 @@ import statsmodels.stats.multitest as multitest
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-st.title("HiC Data Analysis - Flemington's Lab")
+st.title("HiC Data Analysis - Truong Nguyen")
 
 def median(lst):
     lst = sorted(lst)
